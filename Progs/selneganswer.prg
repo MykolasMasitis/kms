@@ -1,0 +1,2 @@
+PROCEDURE selNegAnswer
+RETURN 

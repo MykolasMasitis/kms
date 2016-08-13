@@ -1,0 +1,289 @@
+PROCEDURE webcam
+
+PARAMETERS para1
+PRIVATE  m.flname
+ 
+m.flname = ALLTRIM(para1)
+
+oForm = CREATEOBJECT("clsWebcam")
+oForm.Init
+oForm.Show(1)
+
+DEFINE CLASS clswebcam AS form
+
+Top = 0
+Left = 0
+Height = 641
+Width = 600
+AutoCenter = .T.
+DoCreate = .T.
+Caption = "Улыбнитесь! Вас снимает скрытая камера!"
+Icon = "smile.ico"
+Name = "clswebcam"
+
+ADD OBJECT shape1 AS shape WITH ;
+Top = 480, ;
+Left = 2, ;
+Height = 34, ;
+Width = 596, ;
+SpecialEffect = 0, ;
+Name = "Shape1"
+
+ADD OBJECT ezvidcap1 AS olecontrol WITH ;
+Top = 2, ;
+Left = 2, ;
+Height = 400, ;
+Width = 320, ;
+Name = "ezVidCap1", ;
+OleClass = "vbVidC60.ezVidCap"
+
+ADD OBJECT cbdriver AS combobox WITH ;
+Top = 2, ;
+Height = 24, ;
+Left = 324, ;
+Width = 220, ;
+Name = "cbDriver"
+
+ADD OBJECT chkautosize AS checkbox WITH ;
+Top = 30, ;
+Left = 324, ;
+Height = 17, ;
+Width = 68, ;
+AutoSize = .T., ;
+BackStyle = 0, ;
+Caption = "Auto Size", ;
+Name = "chkAutoSize"
+
+ADD OBJECT chkcenter AS checkbox WITH ;
+Top = 50, ;
+Left = 324, ;
+Height = 17, ;
+Width = 82, ;
+AutoSize = .T., ;
+BackStyle = 0, ;
+Caption = "Auto Center", ;
+Name = "chkCenter"
+
+ADD OBJECT chkstretch AS checkbox WITH ;
+Top = 70, ;
+Left = 324, ;
+Height = 17, ;
+Width = 102, ;
+AutoSize = .T., ;
+BackStyle = 0, ;
+Caption = "Stretch Preview", ;
+Name = "chkStretch"
+
+ADD OBJECT cmdsavedib AS commandbutton WITH ;
+Top = 420, ;
+Left = 275, ;
+Height = 55, ;
+Width = 55, ;
+Caption = "", ;
+Picture = "photo1.bmp"
+Name = "cmdSaveDIB"
+
+ADD OBJECT lblstatuscode AS label WITH ;
+AutoSize = .T., ;
+BackStyle = 0, ;
+Caption = "Status Code", ;
+Height = 17, ;
+Left = 47, ;
+Top = 494, ;
+Width = 70, ;
+ForeColor = RGB(255,0,0), ;
+Name = "lblStatusCode"
+
+ADD OBJECT lblstatusstring AS label WITH ;
+AutoSize = .T., ;
+BackStyle = 0, ;
+Caption = "Status String", ;
+Height = 17, ;
+Left = 315, ;
+Top = 494, ;
+Width = 72, ;
+Name = "lblStatusString"
+
+PROCEDURE Load
+_vfp.AutoYield = .f.
+ENDPROC
+
+PROCEDURE Init
+LOCAL i
+
+thisform.EnableButtons() &&check device caps and enable appropriate btns
+thisform.Refresh()
+If 0 < thisform.ezVidCap1.NumCapDevs
+For i = 0 To thisform.ezVidCap1.NumCapDevs - 1
+thisform.cbDriver.AddItem (thisform.ezVidCap1.GetDriverName(i))
+endfor
+thisform.cbDriver.ListIndex = thisform.ezVidCap1.DriverIndex
+Else
+thisform.cbDriver.AddItem ("<none>")
+thisform.cbDriver.ListIndex = 0
+MESSAGEBOX("No Video Capture Device!",64,thisform.Caption)
+EndIf
+
+thisform.lblStatusCode.caption = "Status Panel"
+thisform.lblStatusString.caption = thisform.ezVidCap1.GetDriverVersion()
+thisform.chkAutoSize.Value = thisform.ezVidCap1.AutoSize
+thisform.chkCenter.Value = thisform.ezVidCap1.CenterVideo
+thisform.chkStretch.Value = thisform.ezVidCap1.StretchPreview
+thisform.Refresh()
+ENDPROC
+
+PROCEDURE MessWithVidBits
+*Still working on this sorry
+ENDPROC
+
+PROCEDURE enablebuttons
+WITH thisform
+With .ezVidCap1
+If .NumCapDevs > 0
+EndIf
+If .HasAudio
+endif
+If .HasDlgFormat
+endif
+If .HasDlgDisplay
+endif
+If .HasDlgSource 
+endif
+EndWith
+endwith
+ENDPROC
+
+
+PROCEDURE ezvidcap1.StatusMessage
+*** ActiveX Control Event ***
+LPARAMETERS statcode, statstring
+thisform.lblStatusCode.Caption = "StatusCode: " + STR(StatCode)
+If StatCode <> 0
+thisform.lblStatusString.Caption = StatString
+EndIf
+thisform.Refresh()
+ENDPROC
+
+
+PROCEDURE ezvidcap1.ErrorMessage
+*** ActiveX Control Event ***
+LPARAMETERS errcode, errstring
+If ErrCode <> 0
+thisform.lblStatusString.caption = "Error " + ErrString
+EndIf
+ENDPROC
+
+
+PROCEDURE ezvidcap1.CaptureYield
+*** ActiveX Control Event ***
+DOEVENTS
+ENDPROC
+
+
+PROCEDURE ezvidcap1.FrameCallback
+*** ActiveX Control Event ***
+LPARAMETERS lpvhdr
+=thisform.MessWithVidBits(lpVHdr)
+ENDPROC
+
+
+PROCEDURE ezvidcap1.PreRollComplete
+*** ActiveX Control Event ***
+Local userRet
+
+userRet = MessageBox("Using precise capture controls." +CHR(13) + CHR(10) +;
+"PreRoll complete - Click OK to start capture immediately.",1, thisform.caption)
+If userRet = 1
+thisform.ezVidCap1.PreciseCaptureStart
+Else
+thisform.ezVidCap1.PreciseCaptureCancel
+EndIf
+ENDPROC
+
+PROCEDURE chkautosize.InteractiveChange
+If thisform.chkAutoSize.Value = .t.
+thisform.ezVidCap1.AutoSize = .T.
+Else
+thisform.ezVidCap1.AutoSize = .F.
+EndIf
+ENDPROC
+
+
+PROCEDURE chkcenter.InteractiveChange
+If thisform.chkCenter.Value = .t.
+thisform.ezVidCap1.CenterVideo = .T.
+Else
+thisform.ezVidCap1.CenterVideo = .F.
+EndIf
+ENDPROC
+
+
+PROCEDURE chkstretch.InteractiveChange
+If thisform.chkStretch.Value = .t.
+thisform.ezVidCap1.StretchPreview = .T.
+Else
+thisform.ezVidCap1.StretchPreview = .F.
+EndIf
+ENDPROC
+
+PROCEDURE cmdsavedib.Click
+
+*LOCAL cFile
+*cFile = PUTFILE('Bitmap files', m.flname, 'BMP')
+IF !EMPTY(m.flname)
+ thisform.ezVidCap1.SaveDIB(m.flname)
+ENDIF
+IF fso.FileExists(m.flname)
+ tcBitmapKey = 'qwert'
+ gdip.CreateBitmapFromFile(tcBitmapKey, m.flname, .f., .t.)
+ 
+ m.ImgWidth  = gdip.GetBitmapWidth(tcBitmapKey)
+ m.ImgHeight = gdip.GetBitmapHeight(tcBitmapKey)
+ m.tnWidth   = 320
+ m.tnHeight  = 400
+ m.tnX       = (m.ImgWidth - m.tnWidth)/2
+ m.tnY       = (m.imgHeight - m.tnHeight)/2
+
+ gdip.ClipBitmap(tcBitmapKey, tnX, tnY, tnWidth, tnHeight)
+ gdip.AdjustGrayScale(tcBitmapKey)
+
+ gdip.SetBitmapResolution(tcBitmapKey, 400, 400)
+ gdip.CopyBitmapToFile(tcBitmapKey, m.flname, "BMP")
+
+ FIInit()
+ 
+ m.lnbitmap  = 0 
+ m.lnbitmap  = FIImageLoad(0, m.flname, 0)
+ m.lnbitmap2 = FIConvertTo8Bits(m.lnbitmap)
+ FIImageUnload(m.lnbitmap)
+ FISaveBitmap2File(2,m.lnbitmap2,STRTRAN(m.flname,'bmp','jpg'), 0)
+ IF fso.FileExists(m.flname)
+  fso.DeleteFile(m.flname)
+ ENDIF 
+ FIImageUnload(m.lnbitmap2)
+ FIRelease()
+
+ENDIF 
+
+thisform.Release 
+
+ENDPROC
+
+PROCEDURE cbdriver.InteractiveChange
+Local oldDriver
+oldDriver = thisform.ezVidCap1.DriverIndex
+
+On ERROR *
+
+thisform.ezVidCap1.DriverIndex = thisform.cbDriver.ListIndex
+
+If ERROR()
+*restore old settings
+thisform.ezVidCap1.DriverIndex = oldDriver
+thisform.cbDriver.ListIndex = oldDriver
+thisform.lblStatusString.caption = "Could not connect!"
+EndIf
+ENDPROC
+
+
+ENDDEFINE

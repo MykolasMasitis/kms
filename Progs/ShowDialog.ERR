@@ -1,0 +1,2 @@
+IF SQLEXEC(m.nhandl, 'select ce.conversation_handle, ce.conversation_id, s.name, sq.name, ce.is_initiator,    ce.state_desc from sys.conversation_endpoints ce join sys.services s on ce.service_id = s.service_id    join sys.service_queues sq on s.service_queue_id = sq.object_id    order by ce.conversation_id, ce.is_initiator desc', 'curss')=-1
+Error in line 22: Command contains unrecognized phrase/keyword.

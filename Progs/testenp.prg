@@ -1,0 +1,51 @@
+FUNCTION testenp
+PARAMETERS lnENP
+
+DO case
+	CASE VARTYPE(lnENP) = 'N'
+		lcENP = STRTRAN(STR(lnENP,16,0),' ','0')
+	CASE VARTYPE(lnENP) = 'C'
+		lcENP = PADL(ALLTRIM(lnENP),16,'0')
+	OTHERWISE
+		lcENP = STRTRAN(SPACE(16),' ','0')
+ENDCASE
+
+VLast = RIGHT(lcENP,1)
+V2 = LEFT(lcENP,LEN(lcENP)-1)
+
+VA1 = ''
+VB1 = ''
+
+lMod = MOD(LEN(V2),2)
+
+IF lMod = 1
+	lModa = 0
+	lModb = -1
+ELSE
+	lModb = 0
+	lModa = -1
+ENDIF
+
+FOR NPos = LEN(V2) + lModa TO 1 STEP -2
+	VA1 = VA1 + SUBSTR(V2,NPos,1)
+ENDFOR
+
+FOR NPos = LEN(V2) + lModb TO 1 STEP -2
+	VB1 = VB1 + SUBSTR(V2,NPos,1)
+ENDFOR
+
+VA = ALLTRIM(STR(INT(VAL(VA1)) * 2))
+VBA = VB1 + VA
+
+VC = 0
+FOR NPos = 1 TO LEN(VBA)
+	VC = VC + VAL(SUBSTR(VBA,NPos,1))
+ENDFOR
+
+VD = (CEILING(VC/10) * 10) - VC
+
+IF NOT VD = VAL(VLast)
+	RETURN (.T.)
+ELSE
+	RETURN (.F.)
+ENDIF

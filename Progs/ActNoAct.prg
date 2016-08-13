@@ -1,0 +1,3 @@
+PROCEDURE ActNoAct
+ REPLACE act WITH !act 
+RETURN 

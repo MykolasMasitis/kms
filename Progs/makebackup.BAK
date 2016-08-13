@@ -1,0 +1,15 @@
+PROCEDURE MakeBackUp
+ IF MESSAGEBOX('янгдюрэ BACKUP ад?',4+32,'')=7
+  RETURN 
+ ENDIF 
+
+ nHandl = SQLCONNECT("ruby", "sa", "")
+ IF nHandl <= 0
+  =AERROR(errarr)
+  = MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'Cannot make connection')
+  RETURN 
+ ENDIF
+ 
+
+ =SQLDISCONNECT(nHandl)
+RETURN 

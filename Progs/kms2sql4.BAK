@@ -1,0 +1,524 @@
+PROCEDURE kms2sql4
+
+ IF MESSAGEBOX('хлонпрхпнбюрэ ад б SQL?',4+32,'')=7
+  RETURN 
+ ENDIF 
+
+ nHandl = SQLCONNECT("ruby")
+ IF nHandl <= 0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot make connection')
+  RETURN 
+ ENDIF
+
+ =SetSession()
+ 
+ IF !DropDataBase()
+  =SQLDISCONNECT(nHandl)
+  RETURN 
+ ELSE 
+  MESSAGEBOX('ад сяоеьмн сдюкемю!',0+64,'')
+ ENDIF 
+ 
+ IF !CreateDataBase()
+  =SQLDISCONNECT(nHandl)
+  RETURN 
+ ELSE 
+  MESSAGEBOX('ад сяоеьмн янгдюмю!',0+64,'')
+ ENDIF 
+ 
+* RETURN 
+ 
+ IF !OpenFoxDb()
+  =SQLDISCONNECT(nHandl)
+  RETURN 
+ ENDIF 
+
+ SELECT kms
+ SET RELATION TO adr_id INTO adr77
+ SET RELATION TO adr50_id INTO adr50 ADDITIVE 
+ SET RELATION TO ofioid INTO ofio ADDITIVE 
+ SET RELATION TO odocid INTO odoc ADDITIVE 
+ SET RELATION TO osmoid INTO osmo ADDITIVE 
+ SET RELATION TO permid INTO permiss ADDITIVE 
+ SET RELATION TO perm2id INTO permis2 ADDITIVE 
+ SET RELATION TO enp2id INTO enp2 ADDITIVE 
+ SET RELATION TO predstid INTO predst ADDITIVE 
+
+ WAIT "хЛОНПР..." WINDOW NOWAIT 
+
+ lnGoodRecs = 0
+ m.d_beg = SECONDS()
+ m.cnt = 0
+ SCAN 
+  SCATTER FIELDS EXCEPT recid,adr_id,adr50_id,ofioid,odocid,osmoid,permid,perm2id,predstid MEMO MEMVAR 
+
+  m.u_doc = ALLTRIM(m.podr_doc)
+  m.mr    = ALLTRIM(m.mr)
+  
+  m.operpv = IIF(m.operpv>0, m.operpv, NULL)
+  m.kl = IIF(m.kl>0, m.kl, NULL)
+  m.e_doc = IIF(!EMPTY(m.e_doc), m.e_doc, NULL)
+  m.d_doc = IIF(!EMPTY(m.d_doc), m.d_doc, NULL)
+  m.dr = IIF(!EMPTY(m.dr), m.dr, NULL)
+  m.dt = IIF(!EMPTY(m.dt), m.dt, NULL)
+  m.dp = IIF(!EMPTY(m.dp), m.dp, NULL)
+  m.gz_data = IIF(!EMPTY(m.gz_data), m.gz_data, NULL)
+  m.vs_data = IIF(!EMPTY(m.vs_data), m.vs_data, NULL)
+  m.d_reg = IIF(!EMPTY(m.dat_reg), m.dat_reg, NULL)
+  m.snils = m.ss
+  
+  m.adr_id = 0
+  m.ul  = IIF(!EMPTY(adr77.ul), adr77.ul, 0)
+  m.dom = IIF(!EMPTY(adr77.d), UPPER(ALLTRIM(adr77.d)), '')
+  m.kor = IIF(!EMPTY(adr77.kor), UPPER(ALLTRIM(adr77.kor)), '')
+  m.str = IIF(!EMPTY(adr77.str), UPPER(ALLTRIM(adr77.str)), '')
+  m.kv  = IIF(!EMPTY(adr77.kv), UPPER(ALLTRIM(adr77.kv)), '')
+  
+  m.adr50_id = 0
+  m.c_okato = IIF(!EMPTY(adr50.c_okato), ALLTRIM(adr50.c_okato), '')
+  m.ra_name = IIF(!EMPTY(adr50.ra_name), ALLTRIM(adr50.ra_name), '')
+  m.np_c    = IIF(!EMPTY(adr50.np_c), ALLTRIM(adr50.np_c), '')
+  m.np_name = IIF(!EMPTY(adr50.np_name), ALLTRIM(adr50.np_name), '')
+  m.ul_c    = IIF(!EMPTY(adr50.ul_c), ALLTRIM(adr50.ul_c), '')
+  m.ul_name = IIF(!EMPTY(adr50.ul_name), ALLTRIM(adr50.ul_name), '')
+  m.dom50   = IIF(!EMPTY(adr50.dom), UPPER(ALLTRIM(adr50.dom)), '')
+  m.kor50   = IIF(!EMPTY(adr50.kor), UPPER(ALLTRIM(adr50.kor)), '')
+  m.str50   = IIF(!EMPTY(adr50.str), UPPER(ALLTRIM(adr50.str)), '')
+  m.kv50    = IIF(!EMPTY(adr50.kv), UPPER(ALLTRIM(adr50.kv)), '')
+  
+  m.ofioid = 0
+  m.ofam = IIF(!EMPTY(ofio.fam), ALLTRIM(ofio.fam), '')
+  m.oim  = IIF(!EMPTY(ofio.im), ALLTRIM(ofio.im), '')
+  m.oot  = IIF(!EMPTY(ofio.ot), ALLTRIM(ofio.ot), '')
+  m.odr  = IIF(!EMPTY(ofio.dr), ofio.dr, NULL)
+  m.ow   = IIF(!EMPTY(ofio.w), ofio.w, 0)
+ 
+  m.odocid = 0
+  m.oc_doc = IIF(!EMPTY(odoc.c_doc), odoc.c_doc, 0)
+  m.os_doc = IIF(!EMPTY(odoc.s_doc), ALLTRIM(odoc.s_doc), '')
+  m.on_doc = IIF(!EMPTY(odoc.n_doc), ALLTRIM(odoc.n_doc), '')
+  m.od_doc = IIF(!EMPTY(odoc.d_doc), odoc.d_doc, NULL)
+  m.oe_doc = IIF(!EMPTY(odoc.e_doc), odoc.e_doc, NULL)
+  
+  m.osmoid = 0
+  m.oogrn  = IIF(!EMPTY(osmo.ogrn), osmo.ogrn, '')
+  m.ookato = IIF(!EMPTY(osmo.okato), osmo.okato, '')
+  m.odp    = IIF(!EMPTY(osmo.dp), osmo.dp, NULL)
+
+  m.permid  = 0
+  m.c_perm  = IIF(!EMPTY(permiss.c_perm), permiss.c_perm, 0)
+  m.s_perm  = IIF(!EMPTY(permiss.s_perm), ALLTRIM(permiss.s_perm), '')
+  m.n_perm  = IIF(!EMPTY(permiss.n_perm), ALLTRIM(permiss.n_perm), '')
+  m.d_perm  = IIF(!EMPTY(permiss.d_perm), permiss.d_perm, NULL)
+  m.e_perm  = IIF(!EMPTY(permiss.e_perm), permiss.e_perm, NULL)
+
+  m.perm2id  = 0
+  m.c_perm2  = IIF(!EMPTY(permis2.c_perm), permis2.c_perm, 0)
+  m.s_perm2  = IIF(!EMPTY(permis2.s_perm), ALLTRIM(permis2.s_perm), '')
+  m.n_perm2  = IIF(!EMPTY(permis2.n_perm), ALLTRIM(permis2.n_perm), '')
+  m.d_perm2  = IIF(!EMPTY(permis2.d_perm), permis2.d_perm, NULL)
+  m.e_perm2  = IIF(!EMPTY(permis2.e_perm), permis2.e_perm, NULL)
+
+  m.enp2id = 0
+  m.enp2   = IIF(!EMPTY(enp2.enp), enp2.enp, '')
+  m.ogrn2  = IIF(!EMPTY(enp2.ogrn), enp2.ogrn, '')
+  m.okato2 = IIF(!EMPTY(enp2.okato), enp2.okato, '')
+  m.dp2    = IIF(!EMPTY(enp2.dp), enp2.dp, NULL)
+
+  m.predstid = 0
+  m.prfam    = IIF(!EMPTY(predst.fam), PROPER(predst.fam), '')
+  m.prim     = IIF(!EMPTY(predst.im), PROPER(predst.im), '')
+  m.prot     = IIF(!EMPTY(predst.ot), PROPER(predst.ot), '')
+  m.prc_doc  = IIF(!EMPTY(predst.c_doc), predst.c_doc, 0)
+  m.prs_doc  = IIF(!EMPTY(predst.s_doc), ALLTRIM(predst.s_doc), '')
+  m.prn_doc  = IIF(!EMPTY(predst.n_doc), ALLTRIM(predst.n_doc), '')
+  m.prd_doc  = IIF(!EMPTY(predst.d_doc), predst.d_doc, NULL)
+  m.pru_doc  = IIF(!EMPTY(predst.podr_doc), ALLTRIM(predst.podr_doc), '')
+  m.prtel1   = IIF(!EMPTY(predst.tel1), ALLTRIM(predst.tel1), '')
+  m.prtel2   = IIF(!EMPTY(predst.tel2), ALLTRIM(predst.tel2), '')
+  m.prinf    = IIF(!EMPTY(predst.inf), ALLTRIM(predst.inf), '')
+
+  m.wrkid = 0
+
+  IF m.ul>0 AND !EMPTY(m.dom) AND !EMPTY(m.kv) && ЙНМБЕПРЮЖХЪ ЛНЯЙНБЯЙХУ ЮДПЕЯНБ
+   CmdAll = "{call seekadr77 (?m.ul, ?m.dom, ?m.kor, ?m.str, ?m.kv)}"  && "exec seekadr77 ?m.ul, ?m.dom, ?m.kor, ?m.str, ?m.kv"
+   IF SQLEXEC(nHandl, CmdAll, "curss") != -1
+    DO CASE
+     CASE RECCOUNT('curss') <= 0
+      IF SQLEXEC(nHandl, "INSERT INTO adr77 (ul,dom,kor,str,kv) VALUES (?m.ul,?m.dom,?m.kor,?m.str,?m.kv)")!=-1 && "exec kmsAdd ?m.fam, ?m.im, ?m.ot"
+       IF SQLEXEC(nHandl, "SELECT @@IDENTITY as recid", "cursid") != -1
+        m.adr_id = cursid.recid
+        USE IN cursid
+       ENDIF 
+      ENDIF 
+
+     CASE RECCOUNT('curss') == 1
+      m.adr_id = curss.recid
+
+     CASE RECCOUNT('curss') > 1
+
+     OTHERWISE 
+
+    ENDCASE 
+    USE IN curss
+   ELSE 
+    =AERROR(errarr)
+    =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'insert into adr77')
+    =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'insert into adr77')
+   ENDIF 
+  ENDIF 
+  
+  cmd01 = 'INSERT INTO kms '
+  cmd02 = '(fam,im,ot,adr_id)'
+  cmd03 = 'VALUES '
+  cmd04 = '(?m.fam,?m.im,?m.ot,?m.adr_id)'
+  cmdAll = cmd01+cmd02+cmd03+cmd04
+  IF SQLEXEC(nHandl, cmdAll)!=-1
+   lnGoodRecs = lnGoodRecs + 1
+  ELSE 
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'insert into kms')
+  ENDIF 
+  IF SQLEXEC(nHandl, "select @@IDENTITY as newid", "cursid") != -1
+   m.sqlid = cursid.newid
+   USE IN cursid
+  ENDIF 
+
+  SELECT kms 
+  m.foxid = recid
+  
+  INSERT INTO transid FROM MEMVAR 
+*  EXIT && !!
+ ENDSCAN 
+ SET RELATION OFF INTO adr77
+ SET RELATION OFF INTO adr50
+ SET RELATION OFF INTO ofio
+ SET RELATION OFF INTO odoc
+ SET RELATION OFF INTO permiss
+ SET RELATION OFF INTO permis2
+ SET RELATION OFF INTO enp2
+ SET RELATION OFF INTO predst
+ USE 
+ USE IN predst
+ USE IN enp2
+ USE IN adr77
+ USE IN adr50
+ USE IN ofio
+ USE IN odoc 
+ USE IN osmo
+ USE IN permiss
+ USE IN permis2
+
+ SELECT moves  
+ USE IN moves 
+ 
+ SELECT answers
+ USE IN answers
+
+ SELECT errors
+ USE IN errors
+
+ m.d_end = SECONDS()
+ WAIT CLEAR 
+ 
+ USE IN transid
+ 
+ MESSAGEBOX("бпелъ напюанрйх: "+TRANSFORM(m.d_end-m.d_beg,'999999999') +' ЯЕЙ.',0+64,'')
+
+ IF SQLEXEC(nHandl, "ALTER DATABASE kms SET MULTI_USER")==-1
+  MESSAGEBOX("ад KMS ме сдюкняэ оепебеярх"+CHR(13)+CHR(10)+;
+  "б лмнцнонкэгнбюрекэяйхи пефхл!!", 0+64, "")
+ ENDIF 
+ =SQLDISCONNECT(nHandl)
+
+RETURN 
+
+FUNCTION SetSession()
+ IF SQLEXEC(nHandl, "SET QUOTED_IDENTIFIER ON")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET QUOTED_IDENTIFIER ON')
+  RETURN 
+ ENDIF 
+ IF SQLEXEC(nHandl, "SET CONCAT_NULL_YIELDS_NULL ON")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET CONCAT_NULL_YIELDS_NULL ON')
+  RETURN 
+ ENDIF 
+ IF SQLEXEC(nHandl, "SET ANSI_NULLS ON")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET ANSI_NULLS ON')
+  RETURN 
+ ENDIF 
+ IF SQLEXEC(nHandl, "SET ANSI_PADDING ON")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET ANSI_PADDING ON')
+  RETURN 
+ ENDIF 
+ IF SQLEXEC(nHandl, "SET ANSI_WARNINGS ON")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET ANSI_WARNINGS ON')
+  RETURN 
+ ENDIF 
+ IF SQLEXEC(nHandl, "SET NUMERIC_ROUNDABORT OFF")<=0
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'SET NUMERIC_ROUNDABORT OFF')
+  RETURN 
+ ENDIF 
+RETURN 
+
+FUNCTION DropDataBase()
+ m.lResult = .T.
+ IF SQLEXEC(nHandl, "USE kmss") != -1
+  IF SQLEXEC(m.nhandl, "if exists (select 1 from sys.symmetric_keys where name like '%DatabaseMasterKey%') drop master key")=-1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'drop master key')
+   m.lResult = .F.
+  ENDIF 
+  IF SQLEXEC(nHandl, "if exists (select 1 from sysobjects where name='kms') drop table kms") == -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop kms')
+   m.lResult = .F.
+  ENDIF 
+  IF SQLEXEC(nHandl, "if exists (select 1 from sysobjects where name='adr77') DROP TABLE adr77") == -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop adr77')
+   m.lResult = .F.
+  ENDIF 
+  IF SQLEXEC(nHandl, "if exists (select 1 from sysobjects where name='kmsview') DROP VIEW kmsview") == -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop kmsview')
+   m.lResult = .F.
+  ENDIF 
+  IF SQLEXEC(nHandl, "if exists (select 1 from sysobjects where name='kmsadd') DROP PROC kmsadd") == -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop kmsadd')
+   m.lResult = .F.
+  ENDIF 
+  IF SQLEXEC(nHandl, "if exists (select 1 from sysobjects where name='seekadr77') DROP PROC seekadr77") == -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop seekadr77')
+   m.lResult = .F.
+  ENDIF 
+
+  IF SQLEXEC(nHandl, "USE master") = -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot use master')
+  ENDIF 
+
+  IF SQLEXEC(nHandl, "DROP DATABASE kmss") = -1
+   =AERROR(errarr)
+   =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot drop kmss')
+   m.lResult = .F.
+  ENDIF 
+
+ ENDIF 
+
+ RETURN m.lResult
+
+ FUNCTION CreateDataBase()
+ 
+ m.lResult = .T.
+
+ IF SQLEXEC(nHandl, "CREATE DATABASE kmss") = -1
+  =SQLDISCONNECT(nHandl)
+  MESSAGEBOX("ме сдюкняэ янгдюрэ ад kms!", 0+64, "")
+  RETURN .F.
+ ENDIF 
+
+ IF SQLEXEC(nHandl, "USE kmss") = -1
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(3)), 16, 'Cannot use kmss')
+  m.lResult = .F.
+ ENDIF 
+
+ cmdAll = 'CREATE TABLE adr77 (recid int identity(0,1) primary key, ul dec(5), dom varchar(7), kor varchar(5), str varchar(5), ;
+  kv varchar(5), created datetime default sysdatetime())' && OK!
+ IF SQLEXEC(nHandl, "INSERT INTO adr77 (ul,dom,kor,str,kv) VALUES (0,'','','','')")=-1
+  =AERROR(errarr)
+  =MESSAGEBOX(ALLTRIM(errarr(2)), 16, 'Cannot insert adr77')
+  m.lResult = .F.
+ ENDIF 
+
+ cmd01  = "CREATE PROC seekadr77 (@ul dec(5)=0, @dom varchar(7)='', @kor varchar(5)='', @str varchar(5)='', @kv varchar(5)='', @recid int=0 out) as "
+ cmd02  = "BEGIN SET NOCOUNT ON; SELECT recid FROM adr77 WHERE ul=@ul AND dom=@dom AND kor=@kor AND str=@str AND kv=@kv; END"
+ cmdAll = cmd01 + cmd02
+
+ cmd01  = 'CREATE TABLE kms '
+ cmd02  = '(recid int identity(1,1) primary key, fam varchar(40), im varchar(40), ot varchar(40),adr_id int foreign key references adr77(recid))'
+ cmdAll = cmd01+cmd02
+
+ cmd01= "CREATE VIEW kmsview AS SELECT "
+ cmd02= "a.fam, a.im, a.ot, b.ul, b.dom, b.kor, b.str, b.kv "
+ cmd03= "FROM dbo.kms a INNER JOIN dbo.adr77 b ON a.adr_id=b.recid "
+ 
+ CmdAll = cmd01+cmd02+cmd03
+
+ cmdAll = 'CREATE PROC kmsAdd (@fam varchar(40), @im varchar(40), @ot varchar(40)) as ;
+ BEGIN SET NOCOUNT ON; insert into kms (fam,im,ot) values (@fam, @im, @ot); END'
+ 
+RETURN m.lResult
+
+FUNCTION OpenFoxDb()
+ IF OpenFile(pbase+'\kms', 'kms', 'shar')>0
+  IF USED('kms')
+   USE IN kms 
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\adr77', 'adr77', 'shar', 'recid')>0
+  USE IN kms
+  IF USED('adr77')
+   USE IN adr77
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\adr50', 'adr50', 'shar', 'recid')>0
+  USE IN kms
+  USE IN adr77
+  IF USED('adr50')
+   USE IN adr50
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\ofio', 'ofio', 'shar', 'recid')>0
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('ofio')
+   USE IN ofio
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\odoc', 'odoc', 'shar', 'recid')>0
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('odoc')
+   USE IN odoc
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\osmo', 'osmo', 'shar', 'recid')>0
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('osmo')
+   USE IN osmo
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\permiss', 'permiss', 'shar', 'recid')>0
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('permiss')
+   USE IN permiss
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\permis2', 'permis2', 'shar', 'recid')>0
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('permis2')
+   USE IN permis2
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\enp2', 'enp2', 'shar', 'recid')>0
+  USE IN permis2
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('enp2')
+   USE IN enp2
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\predst', 'predst', 'shar', 'recid')>0
+  USE IN enp2
+  USE IN permis2
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  IF USED('predst')
+   USE IN predst
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\moves', 'moves', 'shar')>0
+  USE IN enp2
+  USE IN permis2
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  USE IN predst
+  IF USED('moves')
+   USE IN moves
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\answers', 'answers', 'shar')>0
+  USE IN enp2
+  USE IN permis2
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  USE IN predst
+  USE IN moves
+  IF USED('answers')
+   USE IN answers
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ IF OpenFile(pbase+'\e_ffoms', 'errors', 'shar')>0
+  USE IN answers
+  USE IN enp2
+  USE IN permis2
+  USE IN permiss
+  USE IN osmo
+  USE IN odoc
+  USE IN ofio
+  USE IN kms
+  USE IN adr77
+  USE IN adr50
+  USE IN predst
+  USE IN moves
+  IF USED('errors')
+   USE IN errors
+  ENDIF 
+  RETURN .F.
+ ENDIF 
+ 
+ CREATE CURSOR transid (foxid i, sqlid i)
+ INDEX ON foxid TAG foxid
+ SET ORDER TO foxid
+
+RETURN .T.

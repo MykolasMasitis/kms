@@ -1,0 +1,8 @@
+screen=off
+STRICTDATE=0
+CENTURY=ON
+DATE=GERMAN
+resource=off
+_REPORTOUTPUT = 'ReportOutPut.app'
+_REPORTPREVIEW = 'ReportPreview.app'
+

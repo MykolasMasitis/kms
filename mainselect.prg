@@ -1,0 +1,50 @@
+IF 3=2
+ cmd01= "SELECT a.*, b.*, "
+ cmd02= "c.c_okato as c_okato, c.ra_name as ra_name, c.np_c as np_c, c.np_name as np_name, c.ul_c as ul_c, c.ul_name as ul_name, "
+ cmd03= "c.dom as dom2, c.kor as kor2, c.str as str2, c.kv as kv2, "
+ cmd04= "d.fam as prfam, d.im as prim, d.ot as prot, d.c_doc as prc_doc, d.s_doc as prs_doc, d.n_doc as prn_doc, d.d_doc as prd_doc, "
+ cmd05= "d.p_doc as prpodr, d.tel1 as prtel1, d.tel2 as prtel2, d.inf as prpinf, "
+ cmd06= "e.enp as enp2, e.ogrn as ogrn_old2, e.okato as okato_old2, e.dp as dp_old2, "
+ cmd07= "f.c_doc as oc_doc, f.s_doc as os_doc, f.n_doc as on_doc, f.d_doc as od_doc, f.e_doc as oe_doc, "
+ cmd08= "g.fam as ofam, g.im as oim, g.ot as oot, g.w as ow, g.dr as odr, "
+ cmd09= "h.ogrn as ogrn_old, h.okato as okato_old, h.dp as dp_old, "
+ cmd10= "i.c_perm, i.s_perm, i.n_perm, i.d_perm, i.e_perm, "
+ cmd11= "j.c_perm as c_perm2, j.s_perm as s_perm2, j.n_perm as n_perm2, j.d_perm as d_perm2, j.e_perm as e_perm2, "
+ cmd12= "k.code as wrkcode, k.name as wrkname "
+ cmd13= "FROM kms a "
+ cmd14= "LEFT JOIN adr77 b ON a.adr_id=b.recid LEFT JOIN adr50 c ON a.adr50_id=c.recid "
+ cmd15= "LEFT JOIN predst d ON a.predstid=d.recid LEFT JOIN enp2 e ON a.enp2id=e.recid "
+ cmd16= "LEFT JOIN odoc f ON a.odocid=f.recid LEFT JOIN ofio g ON a.ofioid=g.recid "
+ cmd17= "LEFT JOIN osmo h ON a.osmoid=h.recid LEFT JOIN permiss i ON a.permid=i.recid "
+ cmd18= "LEFT JOIN permis2 j ON a.perm2id=j.recid LEFT JOIN wrkpl k ON a.wrkid=k.recid "
+* cmd19= "WHERE "+m.indvir
+ cmd19= ""
+ 
+ CmdAll = cmd01+cmd02+cmd03+cmd04+cmd05+cmd06+cmd07+cmd08+cmd09+cmd10+;
+  cmd11+cmd12+cmd13+cmd14+cmd15+cmd16+cmd17+cmd18+cmd19
+ENDIF 
+
+cmd01= "SELECT a.*, b.*, "
+cmd02= "c.c_okato as c_okato, c.ra_name as ra_name, c.np_c as np_c, c.np_name as np_name, c.ul_c as ul_c, c.ul_name as ul_name, "
+cmd03= "c.dom as dom2, c.kor as kor2, c.str as str2, c.kv as kv2, "
+cmd04= "d.fam as prfam, d.im as prim, d.ot as prot, d.c_doc as prc_doc, d.s_doc as prs_doc, d.n_doc as prn_doc, d.d_doc as prd_doc, "
+cmd05= "d.u_doc as prpodr, d.tel1 as prtel1, d.tel2 as prtel2, d.inf as prpinf, "
+cmd06= "e.enp as enp2, e.ogrn as ogrn_old2, e.okato as okato_old2, e.dp as dp_old2, "
+cmd07= "f.c_doc as oc_doc, f.s_doc as os_doc, f.n_doc as on_doc, f.d_doc as od_doc, f.e_doc as oe_doc, "
+cmd08= "g.fam as ofam, g.im as oim, g.ot as oot, g.w as ow, g.dr as odr, "
+cmd09= "h.ogrn as ogrn_old, h.okato as okato_old, h.dp as dp_old, "
+cmd10= "i.c_perm, i.s_perm, i.n_perm, i.d_perm, i.e_perm, "
+cmd11= "j.c_perm as c_perm2, j.s_perm as s_perm2, j.n_perm as n_perm2, j.d_perm as d_perm2, j.e_perm as e_perm2, "
+cmd12= "k.code as wrkcode, k.name as wrkname "
+cmd13= "FROM kms a "
+cmd14= "LEFT JOIN adr77 b ON a.adr_id=b.recid LEFT JOIN adr50 c ON a.adr50_id=c.recid "
+cmd15= "LEFT JOIN predst d ON a.predstid=d.recid LEFT JOIN enp2 e ON a.enp2id=e.recid "
+cmd16= "LEFT JOIN odoc f ON a.odocid=f.recid LEFT JOIN ofio g ON a.ofioid=g.recid "
+cmd17= "LEFT JOIN osmo h ON a.osmoid=h.recid LEFT JOIN permiss i ON a.permid=i.recid "
+cmd18= "LEFT JOIN permis2 j ON a.perm2id=j.recid LEFT JOIN wrkpl k ON a.wrkid=k.recid "
+
+cmdall=cmd01+cmd02+cmd03+cmd04+cmd05+cmd06+cmd07+cmd08+cmd09+cmd10+cmd11+cmd12+cmd13+cmd14+cmd15+cmd16+cmd17+cmd18
+
+m.nrslt = SQLEXEC(nHandl, CmdAll, "temp")
+
+MESSAGEBOX(STR(m.nrslt),0+64,'')
